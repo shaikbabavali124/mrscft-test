@@ -1,0 +1,16 @@
+There are two Azure roles you can apply to an Azure Active Directory (Azure AD) user or group:
+
+Azure Kubernetes Service Cluster Admin Role
+
+Allows access to Microsoft.ContainerService/managedClusters/listClusterAdminCredential/action API call. This API call lists the cluster admin credentials.
+Downloads kubeconfig for the clusterAdmin role.
+Azure Kubernetes Service Cluster User Role
+
+Allows access to Microsoft.ContainerService/managedClusters/listClusterUserCredential/action API call. This API call lists the cluster user credentials.
+Downloads kubeconfig for clusterUser role.
+ 
+Note:
+
+On clusters that use Azure AD, users with the clusterUser role have an empty kubeconfig file that prompts a login. Once logged in, users have access based on their Azure AD user or group settings. Users with the clusterAdmin role have admin access.
+
+On clusters that don't use Azure AD, the clusterUser role has same effect of clusterAdmin role.

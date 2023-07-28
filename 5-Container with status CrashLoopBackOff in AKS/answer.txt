@@ -1,0 +1,2 @@
+use this command to resolve   -- docker buildx build --platform linux/amd64,linux/arm64 --push -t test/test
+Finally solved the issue, it was due to a mismatch in the CPU architecture between where I was building the docker image and deploying it. I was building on a Mac and deploying to a x86_64 cloud server

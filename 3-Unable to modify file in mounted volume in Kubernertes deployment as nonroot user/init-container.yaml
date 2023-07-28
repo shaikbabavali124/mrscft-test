@@ -1,0 +1,78 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-active-mq-dep
+  labels:
+    app: k8s-active-mq-dep
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: k8s-active-mq-dep
+  template:
+    metadata:
+      labels:
+        app: k8s-active-mq-dep
+    spec:
+      initContainers:
+      - name: take-data-dir-ownership
+        image: alpine:3
+        command:
+        - chown
+        - -R
+        - 472:472
+        - "/tmp"
+      - name: take-data-dir-ownership-2
+        image: alpine:3
+        command:
+        - chown
+        - -R
+        - 472:472
+        - "/opt/apache-activemq-5.16.6/data"
+      containers:
+      - name: k8s-active-mq-dep
+        image: otnqhi9c1vkceu04ehigxgp9.azurecr.io/broker-image:v3
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: WRITEFILE
+            value: "true"
+          - name: ACTIVEMQ_TMP
+            value: "/tmp"
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 8161
+          - containerPort: 61616
+        securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1100
+        
+        volumeMounts:
+          - name: log-writing-folder
+            mountPath: /opt/apache-activemq-5.16.6/data
+          - name: log-writing-folder-tmp
+            mountPath: /tmp
+
+      volumes:
+        - name: log-writing-folder
+          csi:
+            driver: file.csi.azure.com
+            volumeAttributes:
+              shareName: "mnt"
+              secretName: seq-secret
+              mountOptions: "dir_mode=0777,file_mode=0777,cache=strict,actimeo=30" 
+
+        - name: log-writing-folder-tmp
+          csi:
+            driver: file.csi.azure.com
+            volumeAttributes:
+              shareName: "tmp"
+              secretName: seq-secret
+              mountOptions: "dir_mode=0777,file_mode=0777,cache=strict,actimeo=30" 
